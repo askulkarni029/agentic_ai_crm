@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Pro | Advanced Stock Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-boxes-stacked"></i>
+                <h1>Inventory Pro</h1>
+                <p>Sign in to manage your inventory</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+            <div class="login-footer">
+                <p>Default: admin / admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-boxes-stacked"></i>
+                <span>Inventory Pro</span>
+                <button id="sidebarToggle" class="desktop-only"><i class="fas fa-bars"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-page="products">
+                    <i class="fas fa-box"></i>
+                    <span>Products</span>
+                </div>
+                <div class="nav-item" data-page="categories">
+                    <i class="fas fa-tags"></i>
+                    <span>Categories</span>
+                </div>
+                <div class="nav-item" data-page="suppliers">
+                    <i class="fas fa-truck"></i>
+                    <span>Suppliers</span>
+                </div>
+                <div class="nav-item" data-page="stock">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Stock Movements</span>
+                </div>
+                <div class="nav-item" data-page="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="displayUsername">Administrator</span>
+                        <small>Admin</small>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn-logout" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <button id="mobileToggle" class="mobile-only"><i class="fas fa-bars"></i></button>
+                    <h2 id="pageTitle">Dashboard</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="globalSearch" placeholder="Search products...">
+                    </div>
+                    <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="notificationBtn" class="icon-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span id="alertBadge" class="badge">0</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Dashboard Page -->
+                <section id="dashboardPage" class="page active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon primary"><i class="fas fa-box"></i></div>
+                            <div class="stat-info">
+                                <h3 id="totalProducts">0</h3>
+                                <p>Total Products</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon secondary"><i class="fas fa-warehouse"></i></div>
+                            <div class="stat-info">
+                                <h3 id="totalStock">0</h3>
+                                <p>Total Stock</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon warning"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="stat-info">
+                                <h3 id="lowStockCount">0</h3>
+                                <p>Low Stock Items</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon info"><i class="fas fa-tags"></i></div>
+                            <div class="stat-info">
+                                <h3 id="totalCategories">0</h3>
+                                <p>Categories</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Stock by Category</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="stockChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Inventory Distribution</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-tables">
+                        <div class="table-card">
+                            <div class="table-header">
+                                <h3>Low Stock Alerts</h3>
+                                <span id="lowStockBadge" class="status-badge danger">0</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>SKU</th>
+                                            <th>Qty</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lowStockTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="table-card">
+                            <div class="table-header">
+                                <h3>Recent Movements</h3>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Type</th>
+                                            <th>Qty</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentMovementsTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Products Page -->
+                <section id="productsPage" class="page">
+                    <div class="page-actions">
+                        <div class="filters">
+                            <select id="categoryFilter" class="form-control">
+                                <option value="">All Categories</option>
+                            </select>
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="productSearch" placeholder="Search SKU or Name...">
+                            </div>
+                        </div>
+                        <div class="btns">
+                            <button id="exportProductsBtn" class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <button id="addProductBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Product
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th>SKU</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Supplier</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Categories Page -->
+                <section id="categoriesPage" class="page">
+                    <div class="page-actions">
+                        <div></div>
+                        <button id="addCategoryBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Category
+                        </button>
+                    </div>
+                    <div id="categoriesGrid" class="categories-grid"></div>
+                </section>
+
+                <!-- Suppliers Page -->
+                <section id="suppliersPage" class="page">
+                    <div class="page-actions">
+                        <div></div>
+                        <button id="addSupplierBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Supplier
+                        </button>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Company Name</th>
+                                        <th>Contact Person</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Products</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="suppliersTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Stock Page -->
+                <section id="stockPage" class="page">
+                    <div class="page-actions">
+                        <div class="filters">
+                            <select id="movementTypeFilter" class="form-control">
+                                <option value="">All Types</option>
+                                <option value="in">Stock In</option>
+                                <option value="out">Stock Out</option>
+                            </select>
+                            <input type="date" id="movementDateFilter" class="form-control">
+                        </div>
+                        <div class="btns">
+                            <button id="stockOutBtn" class="btn btn-danger">
+                                <i class="fas fa-arrow-up"></i> Stock Out
+                            </button>
+                            <button id="stockInBtn" class="btn btn-success">
+                                <i class="fas fa-arrow-down"></i> Stock In
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Product</th>
+                                        <th>Type</th>
+                                        <th>Quantity</th>
+                                        <th>Reference</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockMovementsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reports Page -->
+                <section id="reportsPage" class="page">
+                    <div class="reports-grid">
+                        <button class="report-btn" onclick="generateInventoryReport()">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Inventory Summary</span>
+                        </button>
+                        <button class="report-btn" onclick="generateMovementReport()">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Stock Movements</span>
+                        </button>
+                        <button class="report-btn" onclick="generateLowStockReport()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Low Stock Report</span>
+                        </button>
+                        <button class="report-btn" onclick="generateValuationReport()">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Valuation Report</span>
+                        </button>
+                    </div>
+
+                    <div id="reportOutput" class="report-output hidden">
+                        <div class="report-header">
+                            <h3 id="reportTitle">Report</h3>
+                            <button onclick="exportReport()" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-file-csv"></i> Export CSV
+                            </button>
+                        </div>
+                        <div id="reportContent" class="table-responsive"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal System -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modalTitle">Modal Title</h2>
+                <button id="modalClose" class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modalBody" class="modal-body">
+                <!-- Form content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
