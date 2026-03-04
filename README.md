@@ -46,11 +46,11 @@ This project demonstrates AI-based automation skills, data processing, intellige
 
 4. AI triggers intelligent alerts:
 
-  4.1 Low stock
+   4.1 Low stock
 
-  4.2 Overstock
+   4.2 Overstock
 
-  4.3 Expiry for perishable items
+   4.3 Expiry for perishable items
 
 5. AI generates predictive recommendations for reorders or promotions
 
